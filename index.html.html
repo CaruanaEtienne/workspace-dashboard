@@ -1,0 +1,836 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Etienne — Workspace Home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:         oklch(0.18 0.006 60);
+    --bg-raise:   oklch(0.215 0.006 60);
+    --bg-raise-2: oklch(0.245 0.006 60);
+    --line:       oklch(0.30 0.006 60);
+    --line-soft:  oklch(0.255 0.006 60);
+    --fg:         oklch(0.93 0.006 80);
+    --fg-dim:     oklch(0.72 0.006 80);
+    --fg-faint:   oklch(0.52 0.006 80);
+    --accent:     oklch(0.74 0.12 var(--accent-hue,200));
+    --accent-dim: oklch(0.74 0.12 var(--accent-hue,200) / 0.18);
+    --danger:     oklch(0.68 0.14 25);
+    --radius:     14px;
+    --shadow:     0 1px 0 oklch(1 0 0/.04) inset,0 20px 60px -30px oklch(0 0 0/.5);
+    --sans:       'Geist',ui-sans-serif,system-ui,sans-serif;
+    --serif:      'Instrument Serif',ui-serif,Georgia,serif;
+    --mono:       'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+
+  .page{max-width:1100px;margin:0 auto;padding:44px 48px 80px}
+
+  /* Hero */
+  .hero{display:grid;grid-template-columns:1fr auto;align-items:end;gap:32px;padding-bottom:32px;border-bottom:1px solid var(--line-soft);margin-bottom:32px}
+  .hero h1{font-family:var(--serif);font-weight:400;font-size:52px;line-height:1.05;margin:0 0 10px;letter-spacing:-.01em}
+  .hero h1 em{font-style:italic;color:var(--fg-dim)}
+  .hero .sub{color:var(--fg-dim);font-size:14px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+  .hero .sub .dot{width:3px;height:3px;border-radius:50%;background:var(--fg-faint)}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--fg-dim)}
+  .pill .bullet{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+  .clock{text-align:right;min-width:260px}
+  .clock .time{font-family:var(--mono);font-size:42px;font-weight:300;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+  .clock .time .sec{color:var(--fg-faint)}
+  .clock .meta{margin-top:8px;color:var(--fg-dim);font-size:12.5px;display:flex;justify-content:flex-end;gap:14px}
+
+  /* Grid */
+  .grid{display:grid;grid-template-columns:1.15fr 1fr;gap:20px}
+  .col{display:flex;flex-direction:column;gap:20px;min-width:0}
+
+  /* Card */
+  .card{background:var(--bg-raise);border:1px solid var(--line-soft);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);min-width:0}
+  .card-h{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .card-h .title{font-size:12.5px;color:var(--fg-dim);letter-spacing:.03em;text-transform:uppercase;font-weight:500}
+  .card-h .spacer{flex:1}
+  .card-h .meta{color:var(--fg-faint);font-size:12px}
+  .icon-btn{width:22px;height:22px;display:grid;place-items:center;color:var(--fg-faint);border-radius:5px}
+  .icon-btn:hover{color:var(--fg);background:oklch(0.27 0.006 60)}
+
+  /* Focus */
+  .focus-body{display:grid;grid-template-columns:200px 1fr;gap:24px;align-items:center}
+  .ring-wrap{position:relative;width:200px;height:200px;display:grid;place-items:center}
+  .ring-wrap svg{position:absolute;inset:0;transform:rotate(-90deg)}
+  .ring-center{position:relative;text-align:center}
+  .ring-center .big{font-family:var(--mono);font-size:36px;font-weight:300;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .ring-center .label{margin-top:2px;font-size:11.5px;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.08em}
+  .focus-side{display:flex;flex-direction:column;gap:14px}
+  .focus-modes{display:flex;gap:4px;background:var(--bg);border:1px solid var(--line-soft);border-radius:8px;padding:3px}
+  .focus-modes button{flex:1;padding:7px 10px;border-radius:5px;font-size:12.5px;color:var(--fg-dim)}
+  .focus-modes button.active{background:var(--bg-raise-2);color:var(--fg)}
+  .focus-task{padding:10px 12px;border:1px dashed var(--line);border-radius:8px;color:var(--fg-dim);font-size:13px;display:flex;align-items:center;gap:8px}
+  .focus-task.linked{border-style:solid;border-color:var(--line);background:var(--bg-raise-2);color:var(--fg)}
+  .focus-task .dot-accent{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+  .focus-task .clear{margin-left:auto;color:var(--fg-faint);font-size:16px;line-height:1}
+  .focus-controls{display:flex;gap:8px}
+  .btn{padding:8px 14px;border-radius:7px;border:1px solid var(--line);background:var(--bg-raise-2);font-size:13px;color:var(--fg);display:inline-flex;align-items:center;gap:7px}
+  .btn:hover{background:oklch(0.27 0.006 60)}
+  .btn.primary{background:var(--accent);color:oklch(0.18 0.006 60);border-color:transparent;font-weight:500}
+  .btn.primary:hover{filter:brightness(1.06)}
+  .btn.ghost{background:transparent}
+  .btn.small{padding:5px 10px;font-size:12px}
+  .focus-stats{display:flex;gap:22px;color:var(--fg-dim);font-size:12.5px;border-top:1px solid var(--line-soft);padding-top:14px}
+  .focus-stats strong{color:var(--fg);font-weight:500;font-variant-numeric:tabular-nums}
+
+  /* Timeline filter tabs */
+  .time-tabs{display:flex;gap:3px;background:var(--bg);border:1px solid var(--line-soft);border-radius:8px;padding:3px;margin-bottom:14px}
+  .time-tabs button{flex:1;padding:6px 8px;border-radius:5px;font-size:12px;color:var(--fg-dim);white-space:nowrap}
+  .time-tabs button.active{background:var(--accent);color:oklch(0.18 0.006 60);font-weight:500}
+  .time-tabs button:not(.active):hover{background:var(--bg-raise-2);color:var(--fg)}
+
+  /* Todos */
+  .todo-list{display:flex;flex-direction:column}
+  .todo{display:flex;align-items:flex-start;gap:10px;padding:9px 2px;border-bottom:1px solid var(--line-soft);cursor:pointer}
+  .todo:last-child{border-bottom:0}
+  .todo .check{width:16px;height:16px;border:1.5px solid var(--fg-faint);border-radius:4px;display:grid;place-items:center;flex-shrink:0;transition:all .15s;margin-top:2px}
+  .todo:hover .check{border-color:var(--fg-dim)}
+  .todo.done .check{background:var(--accent);border-color:var(--accent);color:oklch(0.18 0.006 60)}
+  .todo.done .label-wrap{opacity:.5}
+  .todo.done .main-label{text-decoration:line-through}
+  .label-wrap{flex:1;min-width:0}
+  .main-label{font-size:13.5px}
+  .sub-label{font-size:11px;color:var(--fg-faint);margin-top:1px}
+  .deadline-label{font-size:11px;color:var(--fg-faint);margin-top:1px;font-family:var(--mono)}
+  .todo .tag{font-size:11px;padding:2px 7px;border-radius:4px;background:oklch(0.26 0.006 60);color:var(--fg-faint);flex-shrink:0;margin-top:2px}
+  .todo .tag.client{color:oklch(0.78 0.10 200);background:oklch(0.32 0.04 200/.4)}
+  .todo .tag.urgent{color:oklch(0.78 0.12 25);background:oklch(0.32 0.04 25/.4)}
+  .todo-add{display:flex;align-items:center;gap:10px;padding:10px 2px 2px;color:var(--fg-faint);font-size:13px}
+  .todo-add input{flex:1;background:none;border:0;outline:0;color:var(--fg);font:inherit}
+  .todo-add input::placeholder{color:var(--fg-faint)}
+  .todo-add .plus{width:16px;height:16px;border:1px dashed var(--fg-faint);border-radius:4px;display:grid;place-items:center;flex-shrink:0}
+  .notion-status{font-size:11px;color:var(--fg-faint);font-family:var(--mono);margin-top:8px;display:flex;align-items:center;gap:6px}
+  .notion-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+  .notion-dot.loading{background:oklch(0.74 0.12 70);animation:pulse 1s infinite}
+  .notion-dot.error{background:var(--danger)}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .empty-state{color:var(--fg-faint);font-size:13px;padding:16px 0;text-align:center}
+
+  /* Calendar */
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;width:100%}
+  .cal-day{border:1px solid var(--line-soft);border-radius:7px;padding:7px 5px;min-height:78px;display:flex;flex-direction:column;gap:3px;background:var(--bg-raise-2);min-width:0;overflow:hidden}
+  .cal-day .h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px}
+  .cal-day .dow{font-size:9px;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.04em}
+  .cal-day .date{font-family:var(--mono);font-size:11px;color:var(--fg-dim);font-variant-numeric:tabular-nums}
+  .cal-day.today{border-color:var(--accent);background:color-mix(in oklch,var(--accent) 8%,var(--bg-raise-2))}
+  .cal-day.today .date{color:var(--accent)}
+  .cal-day.today .dow{color:var(--accent)}
+  .cal-event{font-size:10px;padding:2px 4px;border-radius:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-left:2px solid var(--fg-faint);background:oklch(0.27 0.006 60);color:var(--fg-dim)}
+  .cal-event.tax{border-left-color:oklch(0.72 0.11 25);color:oklch(0.88 0.06 25);background:oklch(0.3 0.04 25/.3)}
+  .cal-event.vat{border-left-color:oklch(0.76 0.12 200);color:oklch(0.85 0.04 200);background:oklch(0.3 0.04 200/.3)}
+  .cal-event.corp{border-left-color:oklch(0.76 0.12 140);color:oklch(0.85 0.04 140);background:oklch(0.3 0.04 140/.3)}
+  .cal-event.focus{border-left-color:var(--accent);color:oklch(0.88 0.06 200);background:var(--accent-dim)}
+
+  /* Quick links */
+  .links-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .qlink{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line-soft);border-radius:8px;background:var(--bg-raise-2);color:var(--fg);font-size:13px;transition:border-color .15s,background .15s}
+  .qlink:hover{border-color:var(--accent);background:var(--accent-dim)}
+  .qlink .emoji{width:28px;height:28px;border-radius:6px;background:oklch(0.3 0.006 60);display:grid;place-items:center;font-size:15px;flex-shrink:0}
+  .qlink .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .qlink .arr{color:var(--fg-faint);font-size:12px;transition:color .15s}
+  .qlink:hover .arr{color:var(--accent)}
+
+  /* Spotify */
+  .spotify-wrap{border-radius:10px;overflow:hidden;background:#000}
+  .spotify-wrap iframe{display:block;width:100%;border:none}
+  .spotify-swap{margin-top:10px;display:flex;gap:8px;align-items:center}
+  .spotify-swap input{flex:1;background:var(--bg);border:1px solid var(--line-soft);color:var(--fg);padding:6px 10px;border-radius:6px;font:inherit;font-size:12px}
+  .spotify-swap input::placeholder{color:var(--fg-faint)}
+  .spotify-swap button{padding:6px 12px;border-radius:6px;border:1px solid var(--line);background:var(--bg-raise-2);font-size:12px;color:var(--fg)}
+  .spotify-swap button:hover{background:oklch(0.27 0.006 60)}
+
+  /* Journal */
+  .journal textarea{width:100%;min-height:110px;background:transparent;border:0;outline:0;resize:vertical;color:var(--fg);font-family:var(--serif);font-size:17px;line-height:1.6;padding:0}
+  .journal textarea::placeholder{color:var(--fg-faint);font-style:italic}
+  .journal-footer{display:flex;justify-content:space-between;align-items:center;margin-top:10px;color:var(--fg-faint);font-size:11.5px;font-family:var(--mono);gap:8px;flex-wrap:wrap}
+  .journal-actions{display:flex;align-items:center;gap:8px}
+  .save-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--line);background:var(--bg-raise-2);font-size:11.5px;color:var(--fg-dim);font-family:var(--mono)}
+  .save-btn:hover{background:var(--accent);color:oklch(0.18 0.006 60);border-color:transparent}
+  .save-status{font-size:11px;color:var(--fg-faint)}
+
+  /* Mood picker */
+  .mood-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+  .mood-btn{padding:4px 10px;border-radius:999px;border:1px solid var(--line-soft);background:transparent;font-size:12px;color:var(--fg-dim)}
+  .mood-btn.active{border-color:var(--accent);background:var(--accent-dim);color:var(--fg)}
+  .mood-btn:hover{border-color:var(--line)}
+
+  /* Day overview */
+  .ov-row{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--bg-raise-2);border-radius:8px;border:1px solid var(--line-soft)}
+  .ov-row+.ov-row{margin-top:8px}
+  .ov-label{font-size:13px;color:var(--fg-dim)}
+  .ov-val{font-family:var(--mono);font-size:13px}
+
+  /* Tweaks */
+  .tweaks-btn{position:fixed;bottom:20px;right:20px;width:38px;height:38px;border-radius:50%;background:var(--bg-raise);border:1px solid var(--line);box-shadow:0 4px 16px oklch(0 0 0/.4);display:grid;place-items:center;color:var(--fg-dim);z-index:100}
+  .tweaks-btn:hover{color:var(--fg)}
+  .tweaks-panel{position:fixed;bottom:68px;right:20px;width:240px;background:var(--bg-raise);border:1px solid var(--line);border-radius:12px;padding:16px;z-index:99;box-shadow:0 20px 50px oklch(0 0 0/.6);display:none}
+  .tweaks-panel.open{display:block}
+  .tweaks-panel h3{margin:0 0 14px;font-size:11.5px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-dim)}
+  .tw-row{margin-bottom:12px}
+  .tw-row label{display:block;font-size:11px;color:var(--fg-faint);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+  .tw-hues{display:flex;gap:6px}
+  .tw-hue{width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:border-color .15s}
+  .tw-hue.active{border-color:var(--fg)}
+
+  .ic{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+  @media(max-width:900px){
+    .grid{grid-template-columns:1fr}
+    .page{padding:24px 20px 60px}
+    .hero{grid-template-columns:1fr}
+    .clock{text-align:left}
+    .focus-body{grid-template-columns:1fr}
+    .ring-wrap{margin:0 auto}
+  }
+</style>
+</head>
+<body style="--accent-hue:200;">
+<div class="page">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div>
+      <h1><em id="greeting-pre">Good morning,</em><br/>Etienne.</h1>
+      <div class="sub">
+        <span class="pill"><span class="bullet"></span><span id="status-pill">Ready to work</span></span>
+        <span id="date-full">Sunday, April 19</span>
+        <span class="dot"></span>
+        <span id="week-of">Week 16</span>
+        <span class="dot"></span>
+        <span>Malta · GMT+2</span>
+      </div>
+    </div>
+    <div class="clock">
+      <div class="time"><span id="clock-h">09</span>:<span id="clock-m">00</span><span class="sec">:<span id="clock-s">00</span></span></div>
+      <div class="meta"><span id="clock-ampm">AM</span><span>·</span><span>Malta</span></div>
+    </div>
+  </section>
+
+  <!-- GRID -->
+  <div class="grid">
+
+    <!-- COL A -->
+    <div class="col">
+
+      <!-- FOCUS -->
+      <div class="card">
+        <div class="card-h">
+          <span class="title">Focus session</span>
+          <span class="spacer"></span>
+          <span class="meta">Pomodoro</span>
+        </div>
+        <div class="focus-body">
+          <div class="ring-wrap">
+            <svg viewBox="0 0 100 100" width="200" height="200">
+              <circle cx="50" cy="50" r="44" stroke="oklch(0.28 0.006 60)" stroke-width="4" fill="none"/>
+              <circle id="focus-ring" cx="50" cy="50" r="44" stroke="var(--accent)" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="276.46" stroke-dashoffset="0"/>
+            </svg>
+            <div class="ring-center">
+              <div class="big" id="focus-time">25:00</div>
+              <div class="label" id="focus-label">Ready</div>
+            </div>
+          </div>
+          <div class="focus-side">
+            <div class="focus-modes" id="focus-modes">
+              <button class="active" data-dur="25">25 min</button>
+              <button data-dur="50">50 min</button>
+              <button data-dur="90">90 min</button>
+            </div>
+            <div class="focus-task" id="focus-task">
+              <span class="dot-accent"></span>
+              <span id="focus-task-label">Click a task to focus</span>
+              <button class="clear" id="focus-clear" style="display:none">×</button>
+            </div>
+            <div class="focus-controls">
+              <button class="btn primary" id="focus-play">
+                <svg class="ic" viewBox="0 0 24 24" id="focus-play-icon"><path d="M6 4l14 8-14 8z" fill="currentColor" stroke="none"/></svg>
+                <span id="focus-play-label">Start</span>
+              </button>
+              <button class="btn ghost" id="focus-reset">Reset</button>
+            </div>
+            <div class="focus-stats">
+              <span><strong id="stat-today">0m</strong> focused today</span>
+              <span><strong id="stat-sessions">0</strong> sessions</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WORK ITEMS -->
+      <div class="card">
+        <div class="card-h">
+          <span class="title">Work items — <span id="todo-count">loading…</span></span>
+          <span class="spacer"></span>
+          <button class="icon-btn" id="todo-refresh" title="Refresh from Notion">
+            <svg class="ic" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+          </button>
+        </div>
+
+        <!-- Timeline filter tabs -->
+        <div class="time-tabs" id="time-tabs">
+          <button class="active" data-range="today">Today</button>
+          <button data-range="tomorrow">Tomorrow</button>
+          <button data-range="week">This week</button>
+          <button data-range="month">This month</button>
+        </div>
+
+        <div class="todo-list" id="todo-list">
+          <div class="empty-state">Loading from Notion…</div>
+        </div>
+        <div class="todo-add">
+          <span class="plus">+</span>
+          <input id="todo-input" placeholder="Add a local task…" />
+        </div>
+        <div class="notion-status" id="notion-status">
+          <span class="notion-dot loading" id="notion-dot"></span>
+          <span id="notion-status-text">Connecting to Notion…</span>
+        </div>
+      </div>
+
+      <!-- CALENDAR -->
+      <div class="card">
+        <div class="card-h">
+          <span class="title">This week</span>
+          <span class="spacer"></span>
+          <span class="meta" id="cal-range"></span>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+
+    </div>
+
+    <!-- COL B -->
+    <div class="col">
+
+      <!-- QUICK LINKS -->
+      <div class="card">
+        <div class="card-h"><span class="title">Quick links</span></div>
+        <div class="links-grid">
+          <a class="qlink" href="https://notion.so/347366ad2cca8189b1fafa5402e50301" target="_blank"><span class="emoji">☀️</span><span class="t">Morning Briefing</span><span class="arr">↗</span></a>
+          <a class="qlink" href="https://notion.so/c8df72245a2d4387b671052ae6ae4202" target="_blank"><span class="emoji">📋</span><span class="t">Work Items</span><span class="arr">↗</span></a>
+          <a class="qlink" href="https://notion.so/c75f7f9131d44f358142d24b6ea4185d" target="_blank"><span class="emoji">👥</span><span class="t">Clients</span><span class="arr">↗</span></a>
+          <a class="qlink" href="https://notion.so/253a84a6bff24da1bbcbfea7ce697ce7" target="_blank"><span class="emoji">💰</span><span class="t">Invoices & Billing</span><span class="arr">↗</span></a>
+          <a class="qlink" href="https://notion.so/7ed348f3417840e89ca3c67321606852" target="_blank"><span class="emoji">📅</span><span class="t">Client Meetings</span><span class="arr">↗</span></a>
+          <a class="qlink" href="https://notion.so/345366ad2cca81deb8e0e693b0938e2e" target="_blank"><span class="emoji">🗓️</span><span class="t">Master Calendar</span><span class="arr">↗</span></a>
+          <a class="qlink" href="https://notion.so/73a0880094a6465d89425ae52e875697" target="_blank"><span class="emoji">📓</span><span class="t">Daily Journal</span><span class="arr">↗</span></a>
+          <a class="qlink" href="https://notion.so/345366ad2cca81bf8dd8e3d0529acff9" target="_blank"><span class="emoji">📊</span><span class="t">Financial Summary</span><span class="arr">↗</span></a>
+        </div>
+      </div>
+
+      <!-- SPOTIFY -->
+      <div class="card">
+        <div class="card-h">
+          <span class="title">Now playing</span>
+          <span class="spacer"></span>
+          <span class="meta">Spotify</span>
+        </div>
+        <div class="spotify-wrap">
+          <iframe id="spotify-iframe"
+            src="https://open.spotify.com/embed/playlist/37i9dQZF1DX8NTLI2TtZa6?utm_source=generator&theme=0"
+            width="100%" height="152" frameborder="0" allowfullscreen=""
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            loading="lazy"></iframe>
+        </div>
+        <div class="spotify-swap">
+          <input id="spotify-input" placeholder="Paste any Spotify playlist / album / track link…" />
+          <button id="spotify-swap-btn">Load</button>
+        </div>
+      </div>
+
+      <!-- JOURNAL -->
+      <div class="card journal">
+        <div class="card-h">
+          <span class="title">Morning pages</span>
+          <span class="spacer"></span>
+          <span class="meta" id="journal-date"></span>
+        </div>
+        <!-- Mood picker -->
+        <div class="mood-row" id="mood-row">
+          <button class="mood-btn" data-mood="🟢 Good">🟢 Good</button>
+          <button class="mood-btn" data-mood="🟡 Okay">🟡 Okay</button>
+          <button class="mood-btn" data-mood="⚡ Energised">⚡ Energised</button>
+          <button class="mood-btn" data-mood="🔴 Tough">🔴 Tough</button>
+          <button class="mood-btn" data-mood="😴 Tired">😴 Tired</button>
+        </div>
+        <textarea id="journal-text" placeholder="What's on your mind this morning, Etienne?…"></textarea>
+        <div class="journal-footer">
+          <span id="journal-count">0 words</span>
+          <div class="journal-actions">
+            <span class="save-status" id="save-status">auto-saves locally</span>
+            <button class="save-btn" id="save-notion-btn">Save to Notion ↗</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- DAY OVERVIEW -->
+      <div class="card">
+        <div class="card-h">
+          <span class="title">Day overview</span>
+          <span class="spacer"></span>
+          <span class="meta" id="overview-date"></span>
+        </div>
+        <div class="ov-row"><span class="ov-label">🎯 Focus time</span><span class="ov-val" id="ov-focus">0 min</span></div>
+        <div class="ov-row"><span class="ov-label">✅ Tasks done</span><span class="ov-val" id="ov-tasks">0</span></div>
+        <div class="ov-row"><span class="ov-label">📝 Journal words</span><span class="ov-val" id="ov-words">0</span></div>
+        <div class="ov-row"><span class="ov-label">🕐 Malta time</span><span class="ov-val" id="ov-time">—</span></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- TWEAKS -->
+<button class="tweaks-btn" id="tweaks-toggle" title="Customise">
+  <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 005.5 15a1.65 1.65 0 00-1.51-1H4a2 2 0 010-4h.09A1.65 1.65 0 005.5 9a1.65 1.65 0 00-.33-1.82L5.11 7.12A2 2 0 117.94 4.3l.06.06A1.65 1.65 0 009.82 4.7 1.65 1.65 0 0010.82 3.19V3a2 2 0 014 0v.09c0 .67.39 1.27 1 1.51a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82c.24.61.84 1 1.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+</button>
+<div class="tweaks-panel" id="tweaks-panel">
+  <h3>Customise</h3>
+  <div class="tw-row">
+    <label>Accent colour</label>
+    <div class="tw-hues" id="tw-hues">
+      <span class="tw-hue active" data-hue="200" style="background:oklch(0.74 0.12 200);" title="Blue"></span>
+      <span class="tw-hue" data-hue="70"  style="background:oklch(0.74 0.12 70);"  title="Gold"></span>
+      <span class="tw-hue" data-hue="25"  style="background:oklch(0.74 0.12 25);"  title="Red"></span>
+      <span class="tw-hue" data-hue="150" style="background:oklch(0.74 0.12 150);" title="Green"></span>
+      <span class="tw-hue" data-hue="300" style="background:oklch(0.74 0.12 300);" title="Purple"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Config ────────────────────────────────────────────────────────────────────
+const NOTION_TOKEN  = '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';
+const WORK_ITEMS_DB = 'c8df7224-5a2d-4387-b671-052ae6ae4202';
+const JOURNAL_DB    = '73a08800-94a6-465d-8942-5ae52e875697';
+const NV            = '2022-06-28';
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function pad(n){return String(n).padStart(2,'0')}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+function getMalta(){
+  const parts={};
+  new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Malta',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false})
+    .formatToParts(new Date()).forEach(p=>{parts[p.type]=p.value});
+  return{year:+parts.year,month:+parts.month-1,day:+parts.day,hour:+parts.hour,minute:+parts.minute,second:+parts.second};
+}
+function maltaStr(offset=0){
+  const d=getMalta();
+  const dt=new Date(d.year,d.month,d.day);
+  dt.setDate(dt.getDate()+offset);
+  return dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate());
+}
+function weekBounds(){
+  const d=getMalta();
+  const today=new Date(d.year,d.month,d.day);
+  const dow=today.getDay();
+  const mon=new Date(today); mon.setDate(today.getDate()-((dow+6)%7));
+  const sun=new Date(mon);   sun.setDate(mon.getDate()+6);
+  const fmt=dt=>dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate());
+  return{start:fmt(mon),end:fmt(sun)};
+}
+function monthBounds(){
+  const d=getMalta();
+  const start=d.year+'-'+pad(d.month+1)+'-01';
+  const last=new Date(d.year,d.month+1,0);
+  const end=last.getFullYear()+'-'+pad(last.getMonth()+1)+'-'+pad(last.getDate());
+  return{start,end};
+}
+
+// ── Clock ─────────────────────────────────────────────────────────────────────
+const DAY_NAMES=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MON_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DOW_SHORT=['SUN','MON','TUE','WED','THU','FRI','SAT'];
+
+function tickClock(){
+  const d=getMalta();
+  const isPM=d.hour>=12, h12=((d.hour+11)%12)+1;
+  document.getElementById('clock-h').textContent=pad(h12);
+  document.getElementById('clock-m').textContent=pad(d.minute);
+  document.getElementById('clock-s').textContent=pad(d.second);
+  document.getElementById('clock-ampm').textContent=isPM?'PM':'AM';
+  const dt=new Date(d.year,d.month,d.day);
+  document.getElementById('date-full').textContent=DAY_NAMES[dt.getDay()]+', '+MON_NAMES[d.month]+' '+d.day;
+  const jan1=new Date(d.year,0,1);
+  document.getElementById('week-of').textContent='Week '+Math.ceil((((dt-jan1)/86400000)+jan1.getDay()+1)/7);
+  let g='Good evening,';
+  if(d.hour<5)g='Still burning midnight oil,'; else if(d.hour<12)g='Good morning,'; else if(d.hour<18)g='Good afternoon,';
+  document.getElementById('greeting-pre').textContent=g;
+  const ot=document.getElementById('ov-time');
+  if(ot)ot.textContent=pad(h12)+':'+pad(d.minute)+' '+(isPM?'PM':'AM');
+}
+tickClock(); setInterval(tickClock,1000);
+
+// ── Journal ───────────────────────────────────────────────────────────────────
+let selectedMood='';
+let journalNotionPageId=null; // track if we already created a page today
+
+(function initJournal(){
+  const d=getMalta();
+  const key='wh_journal_'+d.year+'_'+d.month+'_'+d.day;
+  const label=MON_NAMES[d.month].substring(0,3)+' '+d.day;
+  document.getElementById('journal-date').textContent=label;
+  document.getElementById('overview-date').textContent=label;
+  const $j=document.getElementById('journal-text');
+  const $c=document.getElementById('journal-count');
+  const $ow=document.getElementById('ov-words');
+  try{$j.value=localStorage.getItem(key)||'';}catch(e){}
+  // restore saved notion page id for today
+  try{journalNotionPageId=localStorage.getItem('wh_journal_pid_'+key)||null;}catch(e){}
+
+  function updateCount(){
+    const w=$j.value.trim().split(/\s+/).filter(Boolean).length;
+    $c.textContent=w+' word'+(w===1?'':'s');
+    if($ow)$ow.textContent=w;
+  }
+  updateCount();
+  $j.addEventListener('input',()=>{
+    try{localStorage.setItem(key,$j.value);}catch(e){}
+    updateCount();
+  });
+
+  // Mood picker
+  document.querySelectorAll('.mood-btn').forEach(b=>{
+    b.addEventListener('click',()=>{
+      selectedMood=b.dataset.mood===selectedMood?'':b.dataset.mood;
+      document.querySelectorAll('.mood-btn').forEach(x=>x.classList.toggle('active',x.dataset.mood===selectedMood));
+    });
+  });
+
+  // Save to Notion
+  document.getElementById('save-notion-btn').addEventListener('click',async()=>{
+    const text=$j.value.trim();
+    if(!text){alert('Nothing to save yet — write something first.');return;}
+    const btn=document.getElementById('save-notion-btn');
+    const status=document.getElementById('save-status');
+    btn.textContent='Saving…'; btn.disabled=true;
+    try{
+      const d2=getMalta();
+      const todayStr=maltaStr(0);
+      const wordCount=text.split(/\s+/).filter(Boolean).length;
+      const title='Journal · '+MON_NAMES[d2.month].substring(0,3)+' '+d2.day+', '+d2.year;
+
+      if(journalNotionPageId){
+        // Update existing entry
+        await notionReq('https://api.notion.com/v1/pages/'+journalNotionPageId,'PATCH',{
+          properties:{
+            'Content':{rich_text:[{text:{content:text.substring(0,2000)}}]},
+            'Word Count':{number:wordCount},
+            ...(selectedMood?{'Mood':{select:{name:selectedMood}}}:{})
+          }
+        });
+        status.textContent='Updated in Notion ✓';
+      } else {
+        // Create new entry
+        const res=await notionReq('https://api.notion.com/v1/pages','POST',{
+          parent:{database_id:JOURNAL_DB},
+          properties:{
+            'Entry Title':{title:[{text:{content:title}}]},
+            'Date':{'date':{start:todayStr}},
+            'Content':{rich_text:[{text:{content:text.substring(0,2000)}}]},
+            'Word Count':{number:wordCount},
+            ...(selectedMood?{'Mood':{select:{name:selectedMood}}}:{})
+          }
+        });
+        journalNotionPageId=res.id;
+        const key2='wh_journal_'+d2.year+'_'+d2.month+'_'+d2.day;
+        try{localStorage.setItem('wh_journal_pid_'+key2,res.id);}catch(e){}
+        status.textContent='Saved to Notion ✓';
+      }
+    }catch(e){
+      console.error(e);
+      status.textContent='Error saving — check Notion connection';
+    }
+    btn.textContent='Save to Notion ↗'; btn.disabled=false;
+  });
+})();
+
+// ── Notion API ────────────────────────────────────────────────────────────────
+async function notionReq(url,method,body){
+  // Try multiple CORS proxies in sequence until one works
+  const proxies=[
+    u=>'https://corsproxy.io/?'+encodeURIComponent(u),
+    u=>'https://proxy.cors.sh/'+u,
+    u=>'https://thingproxy.freeboard.io/fetch/'+u,
+  ];
+  let lastErr;
+  for(const makeUrl of proxies){
+    try{
+      const res=await fetch(makeUrl(url),{
+        method,
+        headers:{
+          'Authorization':'Bearer '+NOTION_TOKEN,
+          'Notion-Version':NV,
+          'Content-Type':'application/json',
+          'x-requested-with':'XMLHttpRequest',
+        },
+        ...(body?{body:JSON.stringify(body)}:{})
+      });
+      if(!res.ok){const t=await res.text();throw new Error('Notion '+res.status+': '+t.substring(0,200));}
+      return res.json();
+    }catch(e){lastErr=e;continue;}
+  }
+  throw lastErr;
+}
+
+function setStatus(state,text){
+  const dot=document.getElementById('notion-dot');
+  const msg=document.getElementById('notion-status-text');
+  dot.className='notion-dot'+(state==='loading'?' loading':state==='error'?' error':'');
+  msg.textContent=text;
+}
+
+// ── Work Items ────────────────────────────────────────────────────────────────
+let notionItems=[];
+let localItems=[];
+let currentRange='today';
+
+function buildFilter(range){
+  const today=maltaStr(0);
+  const tomorrow=maltaStr(1);
+  const{start:ws,end:we}=weekBounds();
+  const{start:ms,end:me}=monthBounds();
+
+  const makeFilter=(dateStr)=>({
+    or:[
+      {property:'Internal Deadline',date:{equals:dateStr}},
+      {property:'Official Deadline',date:{equals:dateStr}}
+    ]
+  });
+  const makeRangeFilter=(start,end)=>({
+    or:[
+      {and:[{property:'Internal Deadline',date:{on_or_after:start}},{property:'Internal Deadline',date:{on_or_before:end}}]},
+      {and:[{property:'Official Deadline',date:{on_or_after:start}},{property:'Official Deadline',date:{on_or_before:end}}]}
+    ]
+  });
+
+  if(range==='today')    return makeFilter(today);
+  if(range==='tomorrow') return makeFilter(tomorrow);
+  if(range==='week')     return makeRangeFilter(ws,we);
+  if(range==='month')    return makeRangeFilter(ms,me);
+  return makeFilter(today);
+}
+
+function formatDeadline(props){
+  const int=props['Internal Deadline']?.date?.start;
+  const off=props['Official Deadline']?.date?.start;
+  const parts=[];
+  if(int)parts.push('Internal: '+int);
+  if(off)parts.push('Official: '+off);
+  return parts.join(' · ');
+}
+
+async function loadWorkItems(range){
+  setStatus('loading','Loading from Notion…');
+  try{
+    const data=await notionReq('https://api.notion.com/v1/databases/'+WORK_ITEMS_DB+'/query','POST',{
+      filter:buildFilter(range),
+      sorts:[{property:'Official Deadline',direction:'ascending'}],
+      page_size:50
+    });
+    notionItems=data.results.map(page=>{
+      const p=page.properties;
+      const nameArr=p['Work Item']?.title||[];
+      const name=nameArr.map(t=>t.plain_text).join('')||'Untitled';
+      const service=p['Service Type']?.select?.name||'';
+      const stage=p['Stage']?.select?.name||'';
+      const done=stage==='✅ Complete';
+      const deadline=formatDeadline(p);
+      return{id:page.id,label:name,service,deadline,tag:'client',done,focused:false};
+    });
+    renderItems();
+    setStatus('ok','Synced · '+new Date().toLocaleTimeString('en-GB',{timeZone:'Europe/Malta',hour:'2-digit',minute:'2-digit'}));
+  }catch(e){
+    console.error('Notion error:',e);
+    const msg=e.message||'Unknown error';
+    setStatus('error','Error: '+msg.substring(0,80)+' — open browser console (F12) for details');
+    if(notionItems.length===0){ renderItems(); }
+  }
+}
+
+async function markDone(id,done){
+  if(!id)return;
+  try{
+    await notionReq('https://api.notion.com/v1/pages/'+id,'PATCH',{
+      properties:{'Stage':{select:{name:done?'✅ Complete':'⚙️ In Preparation'}}}
+    });
+  }catch(e){console.warn('Could not update Notion Stage',e);}
+}
+
+function renderItems(){
+  const $list=document.getElementById('todo-list');
+  const $count=document.getElementById('todo-count');
+  const $ov=document.getElementById('ov-tasks');
+  const $ft=document.getElementById('focus-task');
+  const $fl=document.getElementById('focus-task-label');
+  const $fc=document.getElementById('focus-clear');
+
+  const all=[...notionItems,...localItems];
+
+  if(all.length===0){
+    const rangeLabel={today:'today',tomorrow:'tomorrow',week:'this week',month:'this month'}[currentRange];
+    $list.innerHTML='<div class="empty-state">No work items due '+rangeLabel+' 🎉</div>';
+    $count.textContent='Nothing due';
+    if($ov)$ov.textContent='0';
+    $ft.classList.remove('linked');
+    $fl.textContent='Click a task to link to focus';
+    $fc.style.display='none';
+    return;
+  }
+
+  $list.innerHTML='';
+  all.forEach(t=>{
+    const el=document.createElement('div');
+    el.className='todo'+(t.done?' done':'')+(t.focused?' focused':'');
+    const tagClass=t.tag==='client'?'client':t.tag==='urgent'?'urgent':'';
+    const tagLabel={client:'Client',urgent:'Urgent',personal:'Personal',admin:'Admin'}[t.tag]||t.tag;
+    el.innerHTML=`
+      <div class="check">${t.done?'<svg class="ic" viewBox="0 0 24 24" style="width:11px;height:11px;stroke-width:3"><path d="M5 12l5 5 9-11"/></svg>':''}</div>
+      <div class="label-wrap">
+        <div class="main-label">${esc(t.label)}</div>
+        ${t.service?'<div class="sub-label">'+esc(t.service)+'</div>':''}
+        ${t.deadline?'<div class="deadline-label">'+esc(t.deadline)+'</div>':''}
+      </div>
+      <span class="tag ${tagClass}">${tagLabel}</span>
+    `;
+    el.addEventListener('click',async()=>{
+      t.done=!t.done;
+      renderItems();
+      if(t.id){
+        await markDone(t.id,t.done);
+        setStatus('ok','Updated in Notion ✓');
+      }
+    });
+    $list.appendChild(el);
+  });
+
+  const done=all.filter(t=>t.done).length;
+  $count.textContent=done+' of '+all.length+' done';
+  if($ov)$ov.textContent=done;
+
+  const focused=all.find(t=>t.focused&&!t.done);
+  if(focused){$ft.classList.add('linked');$fl.textContent=focused.label;$fc.style.display='';}
+  else{$ft.classList.remove('linked');$fl.textContent='Click a task to link to focus';$fc.style.display='none';}
+}
+
+// Tab switching
+document.querySelectorAll('.time-tabs button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.time-tabs button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    currentRange=b.dataset.range;
+    notionItems=[];
+    loadWorkItems(currentRange);
+  });
+});
+
+document.getElementById('todo-input').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target.value.trim()){
+    localItems.push({id:null,label:e.target.value.trim(),service:'',deadline:'',tag:'personal',done:false,focused:false});
+    e.target.value='';
+    renderItems();
+  }
+});
+document.getElementById('todo-refresh').addEventListener('click',()=>loadWorkItems(currentRange));
+document.getElementById('focus-clear').addEventListener('click',e=>{
+  e.stopPropagation();
+  notionItems.forEach(t=>t.focused=false);
+  localItems.forEach(t=>t.focused=false);
+  renderItems();
+});
+
+loadWorkItems('today');
+
+// ── Calendar ──────────────────────────────────────────────────────────────────
+function renderCal(){
+  const d=getMalta();
+  const today=new Date(d.year,d.month,d.day);
+  const dow=today.getDay();
+  const start=new Date(today); start.setDate(today.getDate()-((dow+6)%7));
+  const end=new Date(start); end.setDate(start.getDate()+6);
+  const fmt=dt=>MON_NAMES[dt.getMonth()].substring(0,3)+' '+dt.getDate();
+  document.getElementById('cal-range').textContent=fmt(start)+' – '+fmt(end);
+  const evs={0:[{c:'vat',t:'VAT Q1'}],1:[{c:'focus',t:'Deep work'}],2:[{c:'corp',t:'Corp filing'}],3:[{c:'focus',t:'Calls'}],4:[{c:'tax',t:'Tax review'}],5:[],6:[]};
+  const $cal=document.getElementById('cal-grid'); $cal.innerHTML='';
+  for(let i=0;i<7;i++){
+    const day=new Date(start); day.setDate(start.getDate()+i);
+    const isT=day.toDateString()===today.toDateString();
+    const el=document.createElement('div'); el.className='cal-day'+(isT?' today':'');
+    el.innerHTML=`<div class="h"><span class="dow">${DOW_SHORT[day.getDay()]}</span><span class="date">${day.getDate()}</span></div>${(evs[i]||[]).map(e=>`<div class="cal-event ${e.c}">${e.t}</div>`).join('')}`;
+    $cal.appendChild(el);
+  }
+}
+renderCal();
+
+// ── Focus timer ───────────────────────────────────────────────────────────────
+let fDur=25*60,fLeft=fDur,fRun=false,fInt=null,fSec=0,fSess=0;
+const CIRC=2*Math.PI*44;
+function renderFocus(){
+  document.getElementById('focus-time').textContent=pad(Math.floor(fLeft/60))+':'+pad(fLeft%60);
+  document.getElementById('focus-ring').setAttribute('stroke-dashoffset',CIRC*(1-fLeft/fDur));
+  document.getElementById('focus-label').textContent=fRun?'In progress':fLeft===0?'Complete ✓':fLeft===fDur?'Ready':'Paused';
+  document.getElementById('focus-play-label').textContent=fRun?'Pause':fLeft===fDur?'Start':'Resume';
+  document.getElementById('focus-play-icon').innerHTML=fRun?'<path d="M8 5h3v14H8zM13 5h3v14h-3z" fill="currentColor" stroke="none"/>':'<path d="M6 4l14 8-14 8z" fill="currentColor" stroke="none"/>';
+  const m=Math.floor(fSec/60);
+  document.getElementById('stat-today').textContent=m+'m';
+  document.getElementById('stat-sessions').textContent=fSess;
+  const ov=document.getElementById('ov-focus'); if(ov)ov.textContent=m+' min';
+}
+document.getElementById('focus-play').addEventListener('click',()=>{
+  if(fRun){clearInterval(fInt);fRun=false;renderFocus();return;}
+  fRun=true;fInt=setInterval(()=>{fLeft--;fSec++;if(fLeft<=0){fLeft=0;fSess++;clearInterval(fInt);fRun=false;}renderFocus();},1000);renderFocus();
+});
+document.getElementById('focus-reset').addEventListener('click',()=>{clearInterval(fInt);fRun=false;fLeft=fDur;renderFocus();});
+document.getElementById('focus-modes').querySelectorAll('button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.getElementById('focus-modes').querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');fDur=+b.dataset.dur*60;fLeft=fDur;clearInterval(fInt);fRun=false;renderFocus();
+  });
+});
+renderFocus();
+
+// ── Spotify ───────────────────────────────────────────────────────────────────
+document.getElementById('spotify-swap-btn').addEventListener('click',()=>{
+  const v=document.getElementById('spotify-input').value.trim();
+  if(!v)return;
+  const m=v.match(/spotify\.com\/(playlist|album|track|artist)\/([A-Za-z0-9]+)/);
+  if(m){
+    const u=`https://open.spotify.com/embed/${m[1]}/${m[2]}?utm_source=generator&theme=0`;
+    document.getElementById('spotify-iframe').src=u;
+    try{localStorage.setItem('wh_spotify',u);}catch(e){}
+    document.getElementById('spotify-input').value='';
+  }else{alert('Please paste a valid Spotify link.');}
+});
+try{const s=localStorage.getItem('wh_spotify');if(s)document.getElementById('spotify-iframe').src=s;}catch(e){}
+
+// ── Tweaks ────────────────────────────────────────────────────────────────────
+let accentHue=200;
+try{accentHue=+localStorage.getItem('wh_accent')||200;}catch(e){}
+document.body.style.setProperty('--accent-hue',accentHue);
+document.querySelectorAll('.tw-hue').forEach(h=>{
+  if(+h.dataset.hue===accentHue)h.classList.add('active');
+  h.addEventListener('click',()=>{
+    accentHue=+h.dataset.hue;
+    document.body.style.setProperty('--accent-hue',accentHue);
+    document.querySelectorAll('.tw-hue').forEach(x=>x.classList.remove('active'));
+    h.classList.add('active');
+    try{localStorage.setItem('wh_accent',accentHue);}catch(e){}
+  });
+});
+const $tp=document.getElementById('tweaks-panel');
+document.getElementById('tweaks-toggle').addEventListener('click',()=>$tp.classList.toggle('open'));
+document.addEventListener('click',e=>{if(!$tp.contains(e.target)&&e.target!==document.getElementById('tweaks-toggle'))$tp.classList.remove('open');});
+</script>
+</body>
+</html>
