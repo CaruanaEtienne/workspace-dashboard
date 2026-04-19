@@ -410,9 +410,9 @@
 
 <script>
 // ── Config ────────────────────────────────────────────────────────────────────
-const NOTION_TOKEN  = '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';
 const WORK_ITEMS_DB = 'c8df7224-5a2d-4387-b671-052ae6ae4202';
 const JOURNAL_DB    = '73a08800-94a6-465d-8942-5ae52e875697';
+const NOTION_FN     = '/.netlify/functions/notion';
 const NV            = '2022-06-28';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -558,30 +558,15 @@ let journalNotionPageId=null; // track if we already created a page today
 
 // ── Notion API ────────────────────────────────────────────────────────────────
 async function notionReq(url,method,body){
-  // Try multiple CORS proxies in sequence until one works
-  const proxies=[
-    u=>'https://corsproxy.io/?'+encodeURIComponent(u),
-    u=>'https://proxy.cors.sh/'+u,
-    u=>'https://thingproxy.freeboard.io/fetch/'+u,
-  ];
-  let lastErr;
-  for(const makeUrl of proxies){
-    try{
-      const res=await fetch(makeUrl(url),{
-        method,
-        headers:{
-          'Authorization':'Bearer '+NOTION_TOKEN,
-          'Notion-Version':NV,
-          'Content-Type':'application/json',
-          'x-requested-with':'XMLHttpRequest',
-        },
-        ...(body?{body:JSON.stringify(body)}:{})
-      });
-      if(!res.ok){const t=await res.text();throw new Error('Notion '+res.status+': '+t.substring(0,200));}
-      return res.json();
-    }catch(e){lastErr=e;continue;}
-  }
-  throw lastErr;
+  // Route through Netlify serverless function to avoid CORS issues
+  const path = url.replace('https://api.notion.com/v1/','');
+  const res = await fetch(NOTION_FN+'?path='+encodeURIComponent(path),{
+    method,
+    headers:{'Content-Type':'application/json'},
+    ...(body?{body:JSON.stringify(body)}:{})
+  });
+  if(!res.ok){const t=await res.text();throw new Error('Notion '+res.status+': '+t.substring(0,200));}
+  return res.json();
 }
 
 function setStatus(state,text){
