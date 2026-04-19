@@ -689,13 +689,21 @@ function renderItems(){
       </div>
       <span class="tag ${tagClass}">${tagLabel}</span>
     `;
-    el.addEventListener('click',async()=>{
+    el.querySelector('.check').addEventListener('click',async(e)=>{
+      e.stopPropagation();
       t.done=!t.done;
       renderItems();
       if(t.id){
         await markDone(t.id,t.done);
         setStatus('ok','Updated in Notion ✓');
       }
+    });
+    el.addEventListener('click',()=>{
+      if(t.done)return;
+      const all=[...notionItems,...localItems];
+      all.forEach(x=>x.focused=false);
+      t.focused=true;
+      renderItems();
     });
     $list.appendChild(el);
   });
@@ -727,7 +735,7 @@ document.getElementById('todo-input').addEventListener('keydown',e=>{
     renderItems();
   }
 });
-document.getElementById('todo-refresh').addEventListener('click',()=>loadWorkItems(currentRange));
+document.getElementById('todo-refresh').addEventListener('click',()=>{loadWorkItems(currentRange);loadCalItems();});
 document.getElementById('focus-clear').addEventListener('click',e=>{
   e.stopPropagation();
   notionItems.forEach(t=>t.focused=false);
@@ -738,6 +746,17 @@ document.getElementById('focus-clear').addEventListener('click',e=>{
 loadWorkItems('today');
 
 // ── Calendar ──────────────────────────────────────────────────────────────────
+let calItems = []; // cache of work items for calendar
+
+function serviceClass(serviceType){
+  if(!serviceType) return '';
+  const s = serviceType.toLowerCase();
+  if(s.includes('vat')) return 'vat';
+  if(s.includes('tax')) return 'tax';
+  if(s.includes('corporate') || s.includes('company') || s.includes('annual')) return 'corp';
+  return 'focus';
+}
+
 function renderCal(){
   const d=getMalta();
   const today=new Date(d.year,d.month,d.day);
@@ -746,17 +765,65 @@ function renderCal(){
   const end=new Date(start); end.setDate(start.getDate()+6);
   const fmt=dt=>MON_NAMES[dt.getMonth()].substring(0,3)+' '+dt.getDate();
   document.getElementById('cal-range').textContent=fmt(start)+' – '+fmt(end);
-  const evs={0:[{c:'vat',t:'VAT Q1'}],1:[{c:'focus',t:'Deep work'}],2:[{c:'corp',t:'Corp filing'}],3:[{c:'focus',t:'Calls'}],4:[{c:'tax',t:'Tax review'}],5:[],6:[]};
+
+  // Build a map of date-string → events from calItems
+  const evMap = {};
+  calItems.forEach(item => {
+    if(!item.deadline) return;
+    // deadline is like "Official: 2026-04-19" or "Internal: ..." — extract date
+    const match = item.deadline.match(/(\d{4}-\d{2}-\d{2})/);
+    if(!match) return;
+    const dateKey = match[1];
+    if(!evMap[dateKey]) evMap[dateKey] = [];
+    evMap[dateKey].push({t: item.label, c: serviceClass(item.service), done: item.done});
+  });
+
   const $cal=document.getElementById('cal-grid'); $cal.innerHTML='';
   for(let i=0;i<7;i++){
     const day=new Date(start); day.setDate(start.getDate()+i);
     const isT=day.toDateString()===today.toDateString();
+    const dateKey=day.getFullYear()+'-'+pad(day.getMonth()+1)+'-'+pad(day.getDate());
+    const dayEvs=evMap[dateKey]||[];
     const el=document.createElement('div'); el.className='cal-day'+(isT?' today':'');
-    el.innerHTML=`<div class="h"><span class="dow">${DOW_SHORT[day.getDay()]}</span><span class="date">${day.getDate()}</span></div>${(evs[i]||[]).map(e=>`<div class="cal-event ${e.c}">${e.t}</div>`).join('')}`;
+    const evHtml=dayEvs.map(e=>`<div class="cal-event ${e.c}" style="${e.done?'opacity:.4;text-decoration:line-through':''}">${esc(e.t)}</div>`).join('');
+    el.innerHTML=`<div class="h"><span class="dow">${DOW_SHORT[day.getDay()]}</span><span class="date">${day.getDate()}</span></div>${evHtml}`;
     $cal.appendChild(el);
   }
 }
+
+async function loadCalItems(){
+  try{
+    const{start:ws,end:we}=weekBounds();
+    // Query work items for the whole month so calendar is always populated
+    const{start:ms,end:me}=monthBounds();
+    const data=await notionReq('https://api.notion.com/v1/databases/'+WORK_ITEMS_DB+'/query','POST',{
+      filter:{and:[
+        {property:'Official Deadline',date:{on_or_after:ms}},
+        {property:'Official Deadline',date:{on_or_before:me}},
+        {property:'Stage',select:{does_not_equal:'✅ Complete'}}
+      ]},
+      sorts:[{property:'Official Deadline',direction:'ascending'}],
+      page_size:50
+    });
+    calItems=(data.results||[]).map(page=>{
+      const p=page.properties;
+      const nameArr=p['Work Item']?.title||[];
+      const name=nameArr.map(t=>t.plain_text).join('')||'Untitled';
+      const service=p['Service Type']?.select?.name||'';
+      const stage=p['Stage']?.select?.name||'';
+      const done=stage==='✅ Complete';
+      const deadlineDate=p['Official Deadline']?.date?.start||'';
+      return{id:page.id,label:name,service,deadline:deadlineDate,done};
+    });
+    renderCal();
+  }catch(e){
+    console.warn('Calendar load error:',e);
+    renderCal(); // render empty cal on error
+  }
+}
+
 renderCal();
+loadCalItems();
 
 // ── Focus timer ───────────────────────────────────────────────────────────────
 let fDur=25*60,fLeft=fDur,fRun=false,fInt=null,fSec=0,fSess=0;
